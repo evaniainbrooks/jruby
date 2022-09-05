@@ -38,7 +38,6 @@ import org.jruby.internal.runtime.methods.AliasMethod;
 import org.jruby.internal.runtime.methods.DelegatingDynamicMethod;
 import org.jruby.internal.runtime.methods.DynamicMethod;
 import org.jruby.internal.runtime.methods.IRMethodArgs;
-import org.jruby.internal.runtime.methods.PartialDelegatingMethod;
 import org.jruby.internal.runtime.methods.ProcMethod;
 import org.jruby.runtime.ArgumentDescriptor;
 import org.jruby.runtime.Block;
@@ -71,7 +70,7 @@ public class RubyMethod extends AbstractRubyMethod {
     }
 
     /** Create the RubyMethod class and add it to the Ruby runtime.
-     *
+     * 
      */
     public static RubyClass createMethodClass(Ruby runtime) {
         // TODO: NOT_ALLOCATABLE_ALLOCATOR is probably ok here. Confirm. JRUBY-415
@@ -82,7 +81,7 @@ public class RubyMethod extends AbstractRubyMethod {
 
         methodClass.defineAnnotatedMethods(AbstractRubyMethod.class);
         methodClass.defineAnnotatedMethods(RubyMethod.class);
-
+        
         return methodClass;
     }
 
@@ -109,7 +108,7 @@ public class RubyMethod extends AbstractRubyMethod {
     }
 
     /** Call the method.
-     *
+     * 
      */
     @JRubyMethod(name = {"call", "[]"})
     public IRubyObject call(ThreadContext context, Block block) {
@@ -133,7 +132,7 @@ public class RubyMethod extends AbstractRubyMethod {
     }
 
     /** Returns the number of arguments a method accepted.
-     *
+     * 
      * @return the number of arguments of a method.
      */
     @JRubyMethod
@@ -207,7 +206,7 @@ public class RubyMethod extends AbstractRubyMethod {
     }
 
     /** Create a Proc object.
-     *
+     * 
      */
     @JRubyMethod
     public IRubyObject to_proc(ThreadContext context) {
@@ -226,7 +225,7 @@ public class RubyMethod extends AbstractRubyMethod {
         body = new MethodBlockBody(runtime.getStaticScopeFactory().getDummyScope(), signature, entry, argsDesc,
                 receiver, originModule, originName, getFilename(), line == -1 ? -1 : line - 1);
         Block b = MethodBlockBody.createMethodBlock(body);
-
+        
         return RubyProc.newProc(runtime, b, Block.Type.LAMBDA);
     }
 
@@ -235,10 +234,10 @@ public class RubyMethod extends AbstractRubyMethod {
         RubyUnboundMethod unboundMethod =
         	RubyUnboundMethod.newUnboundMethod(implementationModule, methodName, originModule, originName, entry);
         unboundMethod.infectBy(this);
-
+        
         return unboundMethod;
     }
-
+    
     @JRubyMethod(name = {"inspect", "to_s"})
     @Override
     public IRubyObject inspect() {
@@ -247,7 +246,7 @@ public class RubyMethod extends AbstractRubyMethod {
 
         RubyString str = RubyString.newString(runtime, "#<");
         String sharp = "#";
-
+        
         str.catString(getType().getName()).catString(": ");
 
         RubyModule definedClass;
@@ -360,3 +359,4 @@ public class RubyMethod extends AbstractRubyMethod {
     }
 
 }
+
