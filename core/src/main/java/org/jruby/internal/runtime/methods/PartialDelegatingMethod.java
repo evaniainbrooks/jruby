@@ -43,11 +43,11 @@ import org.jruby.runtime.callsite.CacheEntry;
 
 /**
  * This is similar to {@link DelegatingDynamicMethod} except that it does not delegate most properties of DynamicMethod.
- * Visibility, etc, set on an instance of {@link PartialDelegatingMethod} will not be delegated to the contained entry.method.
+ * Visibility, etc, set on an instance of {@link PartialDelegatingMethod} will not be delegated to the contained method.
  *
- * This type of entry.method is used primarily for altering the visibility of a parent class's method in a child class.
+ * This type of method is used primarily for altering the visibility of a parent class's method in a child class.
  *
- * Note that {@link AliasMethod} is not a suitable substitute since it always passes the entry.method's original name to the
+ * Note that {@link AliasMethod} is not a suitable substitute since it always passes the method's original name to the
  * delegate, and {@link DelegatingDynamicMethod} is not a suitable substitute since it delegates all properties to the
  * delegate.
  *
