@@ -1,5 +1,5 @@
- /*
- ***** BEGIN LICENSE BLOCK *****
+/*
+ **** BEGIN LICENSE BLOCK *****
  * Version: EPL 2.0/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Eclipse Public
@@ -1616,7 +1616,7 @@ public class RubyModule extends RubyObject {
      * failed to return a result. Cache superclass definitions in this class.
      *
      * MRI: method_entry_get_without_cache
-     *
+     * 
      * @param id The name of the method to search for
      * @param cacheUndef Flag for caching UndefinedMethod. This should normally be true.
      * @return The method, or UndefinedMethod if not found
@@ -2236,7 +2236,8 @@ public class RubyModule extends RubyObject {
             if (this == method.getImplementationClass()) {
                 method.setVisibility(visibility);
             } else {
-                DynamicMethod newMethod = new PartialDelegatingMethod(this, entry, visibility);
+                DynamicMethod newMethod = new PartialDelegatingMethod(this, method, visibility);
+
                 methodLocation.addMethod(name, newMethod);
             }
 
@@ -2528,8 +2529,8 @@ public class RubyModule extends RubyObject {
         syncConstants(originalModule);
 
         originalModule.cloneMethods(this);
-
-        this.javaProxy = originalModule.javaProxy;
+        
+        this.javaProxy = originalModule.javaProxy; 
 
         return this;
     }
