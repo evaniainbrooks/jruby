@@ -45,6 +45,12 @@ describe "Method#super_method" do
 
   # jruby:7240
   context "after changing an inherited methods visiblity" do
+    it "returns the expected super_method" do
+      MethodSpecs::ChangedVisibility::C.send :public, :derp
+
+      MethodSpecs::ChangedVisibility::C.instance_method(:derp).super_method.owner.should == MethodSpecs::ChangedVisibility::A
+    end
+
     it "calls the proper super method" do
       MethodSpecs::ChangedVisibility::C.send :public, :derp
 
