@@ -1,5 +1,6 @@
 require_relative '../../spec_helper'
 require_relative 'fixtures/classes'
+require_relative '../method/fixtures/classes'
 
 describe "UnboundMethod#super_method" do
   it "returns the method that would be called by super in the method" do
@@ -24,5 +25,20 @@ describe "UnboundMethod#super_method" do
     parent.send(:undef_method, :foo)
 
     method.super_method.should == nil
+  end
+
+  # jruby:7240
+  context "after changing an inherited methods visiblity" do
+    it "returns the expected super_method" do
+      MethodSpecs::ChangedVisibility::C.send :public, :derp
+
+      MethodSpecs::ChangedVisibility::C.new.method(:derp).super_method.owner.should == MethodSpecs::ChangedVisibility::A
+    end
+
+    it "calls the proper super method" do
+      MethodSpecs::ChangedVisibility::C.send :public, :derp
+
+      MethodSpecs::ChangedVisibility::C.new.derp.should == 500
+    end
   end
 end

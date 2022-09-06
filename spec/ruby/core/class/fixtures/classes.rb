@@ -44,4 +44,5 @@ module CoreClassSpecs
       end
     end
   end
+
 end
