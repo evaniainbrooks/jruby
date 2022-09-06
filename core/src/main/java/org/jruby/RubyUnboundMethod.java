@@ -163,17 +163,21 @@ public class RubyUnboundMethod extends AbstractRubyMethod {
     public IRubyObject super_method(ThreadContext context) {
         RubyModule superClass;
         if (method instanceof PartialDelegatingMethod) {
-          PartialDelegatingMethod delegate = (PartialDelegatingMethod)method;
-          RubyModule definedClass = delegate.getRealMethod().getDefinedClass();
+            PartialDelegatingMethod delegate = (PartialDelegatingMethod)method;
+            RubyModule definedClass = delegate.getRealMethod().getDefinedClass();
 
-          RubyModule module = sourceModule;
-          while (module != null && definedClass != module.getDelegate()) {
-            module = module.getSuperClass();
-          }
-          superClass = module.getSuperClass();
+            RubyModule module = sourceModule;
+            while (module != null && definedClass != module.getDelegate()) {
+                module = module.getSuperClass();
+            }
+
+            if (module != null) {
+                superClass = module.getSuperClass();
+            }
         } else {
-          superClass = sourceModule.getSuperClass();
+            superClass = sourceModule.getSuperClass();
         }
+
         return super_method(context, null, superClass);
     }
 }
