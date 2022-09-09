@@ -348,15 +348,11 @@ public class RubyMethod extends AbstractRubyMethod {
 
     @JRubyMethod
     public IRubyObject super_method(ThreadContext context) {
-        RubyModule superClass;
+        RubyModule superClass = null;
         if (method instanceof PartialDelegatingMethod) {
             PartialDelegatingMethod delegate = (PartialDelegatingMethod)method;
             RubyModule definedClass = delegate.getRealMethod().getDefinedClass();
-
-            RubyModule module = sourceModule;
-            while (module != null && definedClass != module.getDelegate()) {
-                module = module.getSuperClass();
-            }
+            RubyModule module = definedClass.findImplementer(sourceModule.getDelegate());
 
             if (module != null) {
                 superClass = module.getSuperClass();
