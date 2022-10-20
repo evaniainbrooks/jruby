@@ -921,6 +921,8 @@ public class ParserSupport {
             }
             case SYMBOLNODE:
             case DSYMBOLNODE:
+                if (!method) warn(ID.VOID_VALUE_EXPRESSION, node.getLine(), "symbol literal in condition");
+                break;
             case FIXNUMNODE:
                 if (!method) warn(ID.VOID_VALUE_EXPRESSION, node.getLine(), "literal in condition");
                 break;

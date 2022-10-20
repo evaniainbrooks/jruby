@@ -1848,7 +1848,7 @@ public class IRBuilder {
         boolean hasExplicitElse = caseNode.getElseNode() != null; // does this have an explicit 'else' or not.
         Variable result = createTemporaryVariable();      // final result value of the case statement.
         Map<Label, Node> bodies = new HashMap<>();        // we save bodies and emit them after processing when values.
-        Set<IRubyObject> seenLiterals = new HashSet<>();  // track to warn on duplicated values in when clauses.
+        Map<IRubyObject, java.lang.Integer> seenLiterals = new HashMap<>();  // track to warn on duplicated values in when clauses.
 
         for (Node aCase: caseNode.getCases().children()) { // Emit each when value test against the case value.
             WhenNode when = (WhenNode) aCase;
@@ -1906,16 +1906,17 @@ public class IRBuilder {
     }
 
     // returns true if we should emit an eqq for this value (e.g. it has not already been seen yet).
-    private boolean literalWhenCheck(Node value, Set<IRubyObject> seenLiterals) {
+    private boolean literalWhenCheck(Node value, Map<IRubyObject, java.lang.Integer> seenLiterals) {
         IRubyObject literal = getWhenLiteral(value);
 
         if (literal != null) {
-            if (seenLiterals.contains(literal)) {
+            if (seenLiterals.containsKey(literal)) {
+                java.lang.Integer matchLine = seenLiterals.get(literal);
                 scope.getManager().getRuntime().getWarnings().warning(IRubyWarnings.ID.MISCELLANEOUS,
-                        getFileName(), value.getLine(), "duplicated when clause is ignored");
+                        getFileName(), value.getLine(), "duplicated `when' clause with line " + (matchLine.intValue() + 1) + " is ignored");
                 return false;
             } else {
-                seenLiterals.add(literal);
+                seenLiterals.put(literal, new java.lang.Integer(value.getLine()));
                 return true;
             }
         }
@@ -1924,14 +1925,14 @@ public class IRBuilder {
     }
 
     private void buildWhenValues(Variable eqqResult, ListNode exprValues, Operand testValue, Label bodyLabel,
-                                 Set<IRubyObject> seenLiterals) {
+                                 Map<IRubyObject, java.lang.Integer> seenLiterals) {
         for (Node value: exprValues.children()) {
             buildWhenValue(eqqResult, testValue, bodyLabel, value, seenLiterals, false);
         }
     }
 
     private void buildWhenValue(Variable eqqResult, Operand testValue, Label bodyLabel, Node node,
-                                Set<IRubyObject> seenLiterals, boolean needsSplat) {
+                                Map<IRubyObject, java.lang.Integer> seenLiterals, boolean needsSplat) {
         if (literalWhenCheck(node, seenLiterals)) { // we only emit first literal of the same value.
             Operand expression = buildWithOrder(node, node.containsVariableAssignment());
 
@@ -1941,7 +1942,7 @@ public class IRBuilder {
     }
 
     private void buildWhenSplatValues(Variable eqqResult, Node node, Operand testValue, Label bodyLabel,
-                                      Set<IRubyObject> seenLiterals) {
+                                      Map<IRubyObject, java.lang.Integer> seenLiterals) {
         if (node instanceof ListNode && !(node instanceof DNode) && !(node instanceof ArrayNode)) {
             buildWhenValues(eqqResult, (ListNode) node, testValue, bodyLabel, seenLiterals);
         } else if (node instanceof SplatNode) {
@@ -1959,7 +1960,7 @@ public class IRBuilder {
         }
     }
 
-    private void buildWhenArgs(WhenNode whenNode, Operand testValue, Label bodyLabel, Set<IRubyObject> seenLiterals) {
+    private void buildWhenArgs(WhenNode whenNode, Operand testValue, Label bodyLabel, Map<IRubyObject, java.lang.Integer> seenLiterals) {
         Variable eqqResult = createTemporaryVariable();
         Node exprNodes = whenNode.getExpressionNodes();
 
@@ -2007,6 +2008,7 @@ public class IRBuilder {
     private Operand buildFixnumCase(CaseNode caseNode) {
         Map<java.lang.Integer, Label> jumpTable = new HashMap<>();
         Map<Node, Label> nodeBodies = new HashMap<>();
+        Map<java.lang.Integer, java.lang.Integer> lineMap = new HashMap<>();
 
         // gather fixnum-when bodies or bail
         for (Node aCase : caseNode.getCases().children()) {
@@ -2020,8 +2022,11 @@ public class IRBuilder {
             if (jumpTable.get((int) exprLong) == null) {
                 jumpTable.put((int) exprLong, bodyLabel);
                 nodeBodies.put(whenNode, bodyLabel);
+                lineMap.put((int)exprLong, whenNode.getLine());
             } else {
-                scope.getManager().getRuntime().getWarnings().warning(IRubyWarnings.ID.MISCELLANEOUS, getFileName(), expr.getLine(), "duplicated when clause is ignored");
+                int line = lineMap.get((int)exprLong);
+                scope.getManager().getRuntime().getWarnings().warning(IRubyWarnings.ID.MISCELLANEOUS, getFileName(), expr.getLine(), "duplicated `when' clause with line " + (line + 1) + " is ignored");
+
             }
         }
 
