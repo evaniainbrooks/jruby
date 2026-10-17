@@ -1286,12 +1286,14 @@ public class JVMVisitor extends IRVisitor {
 
         // narrow requirements for direct argument passing at this time
         // * has keyword arguments
+        // * keywords are a literal hash with only symbol keys
         // * no splats or kwrest
         // * no supers
         // * no refinements
         if (jvmMethod().invocationCompiler.supportsDirectArguments() &&
                 !CallBase.containsArgSplat(args) &&
                 ThreadContext.hasKeywords(call.getFlags()) &&
+                hasSymbolKeywords(args) &&
                 call.getCallType() != CallType.SUPER &&
                 !call.isPotentiallyRefined() &&
                 (call.getFlags() & ThreadContext.CALL_KEYWORD_REST) == 0) {
@@ -1342,6 +1344,17 @@ public class JVMVisitor extends IRVisitor {
         }
 
         handleCallResult(m, call.getResult());
+    }
+
+    // braceless hash args with non-symbol keys (e.g. foo("a" => 1)) are flagged as keywords but are not a Hash literal
+    private static boolean hasSymbolKeywords(Operand[] args) {
+        if (args.length == 0 || !(args[args.length - 1] instanceof Hash keywords)) return false;
+
+        for (var pair : keywords.pairs) {
+            if (!(pair.getKey() instanceof Symbol)) return false;
+        }
+
+        return true;
     }
 
     private void compileCallWithKeywords(IRBytecodeAdapter m, CallBase call) {

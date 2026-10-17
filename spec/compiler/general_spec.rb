@@ -1605,5 +1605,12 @@ modes.each do |mode|
 
       expect(looped).to eq nonlooped
     end
+
+    it "compiles braceless hash arguments with non-symbol keys" do
+      run('{}.merge("a" => 1)') { expect(it).to eq({"a" => 1}) }
+      run('{}.merge(1 => 2)') { expect(it).to eq({1 => 2}) }
+      run('{}.merge(a: 1, "b" => 2)') { expect(it).to eq({a: 1, "b" => 2}) }
+      run('def kw_nonsym(a: 0, **r) = [a, r]; kw_nonsym(a: 1, "b" => 2)') { expect(it).to eq [1, {"b" => 2}] }
+    end
   end
 end
